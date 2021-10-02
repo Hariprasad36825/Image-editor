@@ -66,9 +66,9 @@ zoomTag.addEventListener("click", function () {
   zoomTag.classList.add("active");
 });
 
-// cropper js
+// Slider js
 const slider = document.querySelector(".rs-range");
-
+var rangeBullet = document.getElementById("rs-bullet");
 function setBackgroundSize(slider) {
   slider.style.setProperty(
     "--background-size",
@@ -78,7 +78,12 @@ function setBackgroundSize(slider) {
 
 setBackgroundSize(slider);
 
-slider.addEventListener("input", () => setBackgroundSize(slider));
+slider.addEventListener("input", function () {
+  setBackgroundSize(slider);
+  var bulletPosition = (slider.value - slider.min) * 2.4;
+  rangeBullet.parentElement.style.left = bulletPosition + "px";
+  rangeBullet.innerHTML = slider.value;
+});
 
 function getBackgroundSize(slider) {
   const min = +slider.min || 0;
@@ -89,6 +94,8 @@ function getBackgroundSize(slider) {
 
   return size;
 }
+
+// cropper js
 
 const cropper = new Cropper(Image_Edit_Preview, {
   // aspectRatio: 16/9,
