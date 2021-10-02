@@ -1,0 +1,29 @@
+.mat {
+  border: 3px solid black;
+}
+
+.bevel {
+  padding: 3px;
+  height: 96%;
+  width: 96%;
+  background: black;
+  border-radius: 5px;
+}
+
+.line {
+  outline: 2px solid black;
+  outline-offset: -4px;
+}
+
+.zebra {
+  border: 3px solid black;
+  outline: 1px solid black;
+  outline-offset: -4px;
+}
+
+.heart {
+  border: 5px solid pink;
+  border-image-source: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/652/hearts-border-image.png);
+  border-image-slice: 20 22;
+  border-image-repeat: round;
+}

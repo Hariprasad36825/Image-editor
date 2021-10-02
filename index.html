@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css"
+      integrity="sha512-0SPWAwpC/17yYyZ/4HSllgaK7/gg9OlVozq8K7rf3J8LvCjYEEIfzzpnA2/SSjpGIunCSD18r3UhvDcu/xncWA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+      integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+      integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+      integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"
+      integrity="sha512-ooSWpxJsiXe6t4+PPjCgYmVfr1NS5QXJACcR/FPpsdm6kqG1FmQ2SVyg2RXeVuCRBLr0lWHnWJP6Zs1Efvxzww=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+
+  <body>
+    <div id="editor" class="d-block img-editor">
+      <div class="d-flex w-100 topEditMenu">
+        <div class="d-flex justify-content-center undoRedoOkDiv">
+          <div
+            class="d-flex align-items-center justify-content-center undoDiv"
+            id="undoDiv"
+          >
+            <img src="src/undo.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center redoDiv"
+            id="redoDiv"
+          >
+            <img src="src/redo.svg" type="image/svg+xml" />
+          </div>
+        </div>
+
+        <div class="d-flex float-end OkDiv" id="okDiv">
+          <img src="src/Ok.svg" type="image/svg+xml" />
+        </div>
+      </div>
+
+      <!-- additional menu for crop -->
+      <div
+        class="d-none justify-content-evenly w-100 AdditionalMenu"
+        id="crop_addtional_menu"
+      >
+        <div
+          class="d-flex align-items-center justify-content-center AdditionalMenuTool_div"
+          id="rotate_90Deg_icon"
+        >
+          <img src="src/Rotate_90.svg" type="image/svg+xml" />
+        </div>
+        <div
+          class="d-flex align-items-center justify-content-center AdditionalMenuTool_div"
+          id="Flip_icon"
+        >
+          <img src="src/Flip.svg" type="image/svg+xml" />
+        </div>
+        <div
+          class="d-flex align-items-center justify-content-center AdditionalMenuTool_div"
+          id="Set_aspectRatio_icon"
+        >
+          <img src="src/SetRatio.svg" type="image/svg+xml" />
+        </div>
+      </div>
+
+      <!-- additional menu for frame -->
+
+      <div class="d-none my-1" id="frame_additioal_menu">
+        <div class="d-flex flex-row justify-content-evenly">
+          <div class="Tag ColorTag mx-1" id="ColorTagForFrame">
+            <input
+              type="color"
+              class="ColorInput"
+              id="ColorInputForFrame"
+              value="#000000"
+            />
+          </div>
+          <label for="customRange1" class="form-label">size:</label>
+          <input
+            type="range"
+            class="form-range size_range"
+            id="size_input"
+            min="0"
+            max="100"
+            value="20"
+            onInput="$('#rangeval').html($(this).val())"
+          />
+          <span class="text-muted" id="rangeval">20</span>
+        </div>
+      </div>
+
+      <!-- image_preview -->
+      <div class="d-block ImagePreview" id="ImagePreview">
+        <img
+          class="Image_Edit_Preview"
+          id="Image_Edit_Preview"
+          src="src/temp.jpg"
+          alt=""
+        />
+      </div>
+
+      <!-- Crop submenu -->
+      <div class="d-block" id="Crop_submenu">
+        <div
+          class="d-flex flex-column justify-content-center align-items-center"
+          id="ScaleDiv"
+        >
+          <div class="range-slider d-flex flex-column my-1">
+            <p id="rs-bullet" class="rs-label align-items-center">0</p>
+            <input
+              id="rs-range-line"
+              class="rs-range w-90"
+              type="range"
+              value="0"
+              min="0"
+              max="100"
+            />
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <div
+            class="d-flex flex-row justify-content-evenly align-items-center w-98 TagDiv"
+            id="CropTagContainer"
+          >
+            <small class="text-muted Tag active" id="zoomTag">Zoom</small>
+            <small class="text-muted Tag" id="RotationTag">Rotation</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- adjust submenu -->
+
+      <div class="d-none" id="Adjust_submenu">
+        <div
+          class="d-flex flex-column justify-content-center ScaleDiv"
+          id="ScaleDiv"
+        >
+          <!-- <button class="btn btn-light reset_button" type="button" disabled="">|</button>
+              <span class="text-muted ScaleInput">0°</span>
+              <div class="Scale">
+                  <svg width="404" height="56" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 404 56" aria-hidden="true" focusable="false">
+                    <path d="M202 24 l2 3 l-2 -1 l-2 1 z"></path>
+                    <rect rx="4" ry="4" y="24" "="" height="8"></rect>
+                    <path fill-rule="evenodd" d="M 0 28 a 2 2 0 1 0 0 -1 M 11.25 28 a 0.75 0.75 0 1 0 0 -1 M 21.25 28 a 0.75 0.75 0 1 0 0 -1 M 31.25 28 a 0.75 0.75 0 1 0 0 -1 M 41.25 28 a 0.75 0.75 0 1 0 0 -1 M 50 28 a 2 2 0 1 0 0 -1 M 61.25 28 a 0.75 0.75 0 1 0 0 -1 M 71.25 28 a 0.75 0.75 0 1 0 0 -1 M 81.25 28 a 0.75 0.75 0 1 0 0 -1 M 91.25 28 a 0.75 0.75 0 1 0 0 -1 M 100 28 a 2 2 0 1 0 0 -1 M 111.25 28 a 0.75 0.75 0 1 0 0 -1 M 121.25 28 a 0.75 0.75 0 1 0 0 -1 M 131.25 28 a 0.75 0.75 0 1 0 0 -1 M 141.25 28 a 0.75 0.75 0 1 0 0 -1 M 150 28 a 2 2 0 1 0 0 -1 M 161.25 28 a 0.75 0.75 0 1 0 0 -1 M 171.25 28 a 0.75 0.75 0 1 0 0 -1 M 181.25 28 a 0.75 0.75 0 1 0 0 -1 M 191.25 28 a 0.75 0.75 0 1 0 0 -1 M 200 28 a 2 2 0 1 0 0 -1 M 211.25 28 a 0.75 0.75 0 1 0 0 -1 M 221.25 28 a 0.75 0.75 0 1 0 0 -1 M 231.25 28 a 0.75 0.75 0 1 0 0 -1 M 241.25 28 a 0.75 0.75 0 1 0 0 -1 M 250 28 a 2 2 0 1 0 0 -1 M 261.25 28 a 0.75 0.75 0 1 0 0 -1 M 271.25 28 a 0.75 0.75 0 1 0 0 -1 M 281.25 28 a 0.75 0.75 0 1 0 0 -1 M 291.25 28 a 0.75 0.75 0 1 0 0 -1 M 300 28 a 2 2 0 1 0 0 -1 M 311.25 28 a 0.75 0.75 0 1 0 0 -1 M 321.25 28 a 0.75 0.75 0 1 0 0 -1 M 331.25 28 a 0.75 0.75 0 1 0 0 -1 M 341.25 28 a 0.75 0.75 0 1 0 0 -1 M 350 28 a 2 2 0 1 0 0 -1 M 361.25 28 a 0.75 0.75 0 1 0 0 -1 M 371.25 28 a 0.75 0.75 0 1 0 0 -1 M 381.25 28 a 0.75 0.75 0 1 0 0 -1 M 391.25 28 a 0.75 0.75 0 1 0 0 -1 M 400 28 a 2 2 0 1 0 0 -1"></path>
+                  </svg>
+              </div> -->
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <div
+            class="d-flex flex-row align-items-center w-90 TagDiv"
+            id="CropTagContainer"
+          >
+            <small class="text-muted mx-1 Tag active" id="BrightnessTag"
+              >Brightness</small
+            >
+            <small class="text-muted mx-1 Tag" id="ContrastTag">Contrast</small>
+            <small class="text-muted mx-1 Tag" id="SaturationTag"
+              >Saturation</small
+            >
+            <small class="text-muted mx-1 Tag" id="ExposureTag">Exposure</small>
+            <small class="text-muted mx-1 Tag" id="TemperatureTag"
+              >Temperature</small
+            >
+            <small class="text-muted mx-1 Tag" id="GammaTag">Gamma</small>
+            <small class="text-muted mx-1 Tag" id="ClarityTag">Clarity</small>
+            <small class="text-muted mx-1 Tag" id="VignetteTag">Vignette</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- annotate submenu -->
+
+      <div class="d-none" id="Annotote_submenu">
+        <div class="d-flex justify-content-center">
+          <div
+            class="d-flex flex-row align-items-center justify-content-evenly w-90 annotateDiv"
+            id="CropTagContainer"
+          >
+            <div class="Tag ColorTag mx-1" id="ColorTag">
+              <input
+                type="color"
+                class="ColorInput"
+                id="ColorInput"
+                value="#00FBFF"
+              />
+            </div>
+            <div class="IconTag mx-1" id="Eraser">
+              <img src="src/eraser.svg" type="image/svg+xml" />
+            </div>
+            <div class="IconTag mx-1" id="Text">
+              <img src="src/Text.svg" type="image/svg+xml" />
+            </div>
+            <div class="dropup">
+              <button
+                type="button"
+                class="btn btn-light dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                id="lineWidthTag"
+              >
+                width
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="lineWidthTag">
+                <!-- Dropdown menu links -->
+                <li><a class="dropdown-item" href="#">Extra small</a></li>
+                <li><a class="dropdown-item active" href="#">Small</a></li>
+                <li><a class="dropdown-item" href="#">Medium</a></li>
+                <li><a class="dropdown-item" href="#">Large</a></li>
+                <li><a class="dropdown-item" href="#">Extra Large</a></li>
+              </ul>
+            </div>
+            <div class="dropup">
+              <button
+                type="button"
+                class="btn btn-light dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                id="lineWidthTag"
+              >
+                Shape
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="lineWidthTag">
+                <!-- Dropdown menu links -->
+                <li><a class="dropdown-item active" href="#">Custom</a></li>
+                <li><a class="dropdown-item" href="#">line</a></li>
+                <li><a class="dropdown-item" href="#">Arrow</a></li>
+                <li><a class="dropdown-item" href="#">Rectangle</a></li>
+                <li><a class="dropdown-item" href="#">Elipse</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- filter submenu -->
+
+      <div class="d-none" id="filter_submuenu">
+        <div class="d-flex flex-row w-90 filter_div">
+          <div class="d-inline-flex mx-2 filter-group-preview">
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="default"
+            >
+              <img
+                class="Image_Edit_Preview active"
+                src="src/temp.jpg"
+                alt=""
+              />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >Default</small
+              >
+            </div>
+          </div>
+
+          <div class="d-inline-flex mx-2 filter-group-preview">
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="chrome"
+            >
+              <img
+                class="Image_Edit_Preview chrome"
+                src="src/temp.jpg"
+                alt=""
+              />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >Chrome</small
+              >
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="fade"
+            >
+              <img class="Image_Edit_Preview Fade" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Fade</small>
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="cold"
+            >
+              <img class="Image_Edit_Preview cold" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Cold</small>
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="warm"
+            >
+              <img class="Image_Edit_Preview warm" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Warm</small>
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="pastel"
+            >
+              <img
+                class="Image_Edit_Preview pastel"
+                src="src/temp.jpg"
+                alt=""
+              />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >Pastel</small
+              >
+            </div>
+          </div>
+
+          <div class="d-inline-flex mx-2 filter-group-preview">
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="mono"
+            >
+              <img class="Image_Edit_Preview mono" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Mono</small>
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="nair"
+            >
+              <img class="Image_Edit_Preview nair" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Nair</small>
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="stark"
+            >
+              <img class="Image_Edit_Preview stark" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >Stark</small
+              >
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="wash"
+            >
+              <img class="Image_Edit_Preview wash" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Wash</small>
+            </div>
+          </div>
+
+          <div class="d-inline-flex mx-2 filter-group-preview">
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="sepia"
+            >
+              <img class="Image_Edit_Preview sepia" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >sepia</small
+              >
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="rust"
+            >
+              <img class="Image_Edit_Preview rust" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;">Rust</small>
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="blues"
+            >
+              <img class="Image_Edit_Preview blues" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >Blues</small
+              >
+            </div>
+            <div
+              class="d-flex flex-column align-items-center filter_preview"
+              id="color"
+            >
+              <img class="Image_Edit_Preview color" src="src/temp.jpg" alt="" />
+              <small class="text-muted" style="font-size: 0.65rem;"
+                >Color</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sticker submenu -->
+
+      <div class="d-none" id="Sticker_submenu">
+        <div class="d-flex flex-column justify-content-center">
+          <div
+            class="d-flex flex-row align-items-center Stickers_container"
+            id="Stickers_container"
+          >
+            <div class="StickerTag mx-1" id="Crown">
+              <img class="Sticker" src="src/Crown.svg" type="image/svg+xml" />
+            </div>
+            <div class="StickerTag mx-1" id="Party_emoji">
+              <img
+                class="Sticker"
+                src="src/Party_emoji.svg"
+                type="image/svg+xml"
+              />
+            </div>
+            <div class="StickerTag mx-1" id="cake">
+              <img class="Sticker" src="src/cake.svg" type="image/svg+xml" />
+            </div>
+            <div class="StickerTag mx-1" id="Heart_eyes">
+              <img
+                class="Sticker"
+                src="src/Heart_eyes.svg"
+                type="image/svg+xml"
+              />
+            </div>
+            <div class="StickerTag mx-1" id="Smile_emoji">
+              <img
+                class="Sticker"
+                src="src/Smile_emoji.svg"
+                type="image/svg+xml"
+              />
+            </div>
+            <div class="StickerTag mx-1" id="ThumbsUp">
+              <img
+                class="Sticker"
+                src="src/ThumbsUp.svg"
+                type="image/svg+xml"
+              />
+            </div>
+            <div class="StickerTag mx-1" id="ThumbsDown">
+              <img
+                class="Sticker"
+                src="src/ThumbsDown.svg"
+                type="image/svg+xml"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center">
+          <small
+            class="text-muted mx-1 Tag border rounded-pill"
+            id="Select_image_Tag"
+            >Select Image</small
+          >
+        </div>
+      </div>
+
+      <!-- frame submenu -->
+
+      <div class="d-none" id="frame_submenu">
+        <div class="d-flex flex-row w-90 mx-2 filter_div">
+          <div
+            class="d-flex flex-column align-items-center mx-2 frame_preview"
+            id="frame_none"
+          >
+            <img class="Image_Edit_Preview active" src="src/temp.jpg" alt="" />
+            <small class="text-muted" style="font-size: 0.65rem;">None</small>
+          </div>
+          <div
+            class="d-flex flex-column align-items-center mx-2 frame_preview"
+            id="frame_mat"
+          >
+            <img class="Image_Edit_Preview mat" src="src/temp.jpg" alt="" />
+            <small class="text-muted" style="font-size: 0.65rem;">Mat</small>
+          </div>
+          <div
+            class="d-flex flex-column align-items-center mx-2 frame_preview"
+            id="frame_bevel"
+          >
+            <img class="Image_Edit_Preview bevel" src="src/temp.jpg" alt="" />
+            <small class="text-muted" style="font-size: 0.65rem;">Bevel</small>
+          </div>
+          <div
+            class="d-flex flex-column align-items-center mx-2 frame_preview"
+            id="frame_line"
+          >
+            <img class="Image_Edit_Preview line" src="src/temp.jpg" alt="" />
+            <small class="text-muted" style="font-size: 0.65rem;">Line</small>
+          </div>
+          <div
+            class="d-flex flex-column align-items-center mx-2 frame_preview"
+            id="frame_zebra"
+          >
+            <img class="Image_Edit_Preview zebra" src="src/temp.jpg" alt="" />
+            <small class="text-muted" style="font-size: 0.65rem;">Zebra</small>
+          </div>
+          <div
+            class="d-flex flex-column align-items-center mx-2 frame_preview"
+            id="frame_heart"
+          >
+            <img class="Image_Edit_Preview heart" src="src/temp.jpg" alt="" />
+            <small class="text-muted" style="font-size: 0.65rem;">Heart</small>
+          </div>
+          <!-- <div class="d-flex flex-column align-items-center mx-2 frame_preview" id="frame_inset">
+            <img class="Image_Edit_Preview " src="src/temp.jpg" alt="">
+            <small class="text-muted" style="font-size: .65rem">Inset</small>
+          </div>
+          <div class="d-flex flex-column align-items-center mx-2 frame_preview" id="frame_plus">
+            <img class="Image_Edit_Preview " src="src/temp.jpg" alt="">
+            <small class="text-muted" style="font-size: .65rem">Plus</small>
+          </div>
+          <div class="d-flex flex-column align-items-center mx-2 frame_preview" id="frame_hook">
+            <img class="Image_Edit_Preview" src="src/temp.jpg" alt="">
+            <small class="text-muted" style="font-size: .65rem">Hook</small>
+          </div> -->
+        </div>
+      </div>
+
+      <!-- Resize submenu -->
+      <div class="d-none" id="Resize_submenu">
+        <div
+          class="d-flex flex-row justify-content-evenly align-items-center w-98 TagDiv"
+          id="CropTagContainer"
+        >
+          <div class="d-inline-flex align-items-center position-relative">
+            <label
+              class="text-muted r-label"
+              for="width-eoiav3jra"
+              title="Width"
+              aria-label="Width"
+              >w</label
+            >
+            <input
+              class="tag_input"
+              id="width-eoiav3jra"
+              type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              data-state="undetermined"
+              autocomplete="off"
+              placeholder="1200"
+            />
+          </div>
+          <span class="lock"></span>
+          <div class="d-inline-flex align-items-center position-relative">
+            <label
+              class="text-muted r-label"
+              for="width-eoiav3jra"
+              title="Width"
+              aria-label="Width"
+              >w</label
+            >
+            <input
+              class="tag_input"
+              id="width-eoiav3jra"
+              type="number"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              data-state="undetermined"
+              autocomplete="off"
+              placeholder="1200"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- toolbar -->
+      <div class="d-flex justify-content-center">
+        <div class="d-flex justify-content-evenly w-100 Toolbar" id="Toolbar">
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="crop_icon"
+          >
+            <img src="src/crop.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="adjust_icon"
+          >
+            <img src="src/adjust.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="annotate_icon"
+          >
+            <img src="src/annotote.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="filter_icon"
+          >
+            <img src="src/filter.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="sticker_icon"
+          >
+            <img src="src/sticker.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="frame_icon"
+          >
+            <img src="src/frame.svg" type="image/svg+xml" />
+          </div>
+          <div
+            class="d-flex align-items-center justify-content-center Tool_div"
+            id="resize_icon"
+          >
+            <img src="src/resize.svg" type="image/svg+xml" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="src/index.js"></script>
+  </body>
+</html>

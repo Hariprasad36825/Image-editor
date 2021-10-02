@@ -1,0 +1,53 @@
+.chrome {
+  filter: contrast(200%);
+}
+
+.Fade {
+  filter: contrast(70%);
+}
+
+.cold {
+  filter: hue-rotate(180deg) sepia(75%) contrast(150%) saturate(300%)
+    hue-rotate(180deg);
+}
+
+.warm {
+  filter: sepia(50%) contrast(150%) saturate(200%) brightness(100%)
+    hue-rotate(-15deg);
+}
+
+.pastel {
+  filter: brightness(150%);
+}
+
+.mono {
+  filter: grayscale(100%);
+}
+
+.nair {
+  filter: grayscale(100) contrast(150%);
+}
+
+.stark {
+  filter: grayscale(100%) brightness(150%);
+}
+
+.wash {
+  filter: grayscale(100%) brightness(150%) contrast(125%);
+}
+
+.sepia {
+  filter: sepia(100%);
+}
+
+.rust {
+  filter: sepia(100%) contrast(80%) brightness(80%);
+}
+
+.blues {
+  filter: sepia(100%) grayscale(80%);
+}
+
+.color {
+  filter: sepia(50%) grayscale(10%);
+}
