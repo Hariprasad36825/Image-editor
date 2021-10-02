@@ -133,14 +133,18 @@
           id="ScaleDiv"
         >
           <div class="range-slider d-flex flex-column my-1">
-            <p id="rs-bullet" class="rs-label align-items-center">0</p>
+            <div
+              class="d-flex justify-content-center align-items-center rs-label"
+            >
+              <p id="rs-bullet" class="text-muted mt-3">0</p>
+            </div>
             <input
               id="rs-range-line"
               class="rs-range w-90"
               type="range"
               value="0"
-              min="0"
-              max="100"
+              min="-50"
+              max="50"
             />
           </div>
         </div>
