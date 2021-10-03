@@ -47,7 +47,7 @@
       <div class="d-flex w-100 topEditMenu">
         <div class="d-flex justify-content-center undoRedoOkDiv">
           <div
-            class="d-flex align-items-center justify-content-center undoDiv"
+            class="d-flex align-items-center justify-content-center undoDiv active"
             id="undoDiv"
           >
             <img src="src/undo.svg" type="image/svg+xml" />
@@ -82,11 +82,22 @@
         >
           <img src="src/Flip.svg" type="image/svg+xml" />
         </div>
-        <div
-          class="d-flex align-items-center justify-content-center AdditionalMenuTool_div"
-          id="Set_aspectRatio_icon"
-        >
-          <img src="src/SetRatio.svg" type="image/svg+xml" />
+        <div class="dropdown">
+          <div
+            class="d-flex align-items-center justify-content-center AdditionalMenuTool_div"
+            id="Set_aspectRatio_icon"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <img src="src/SetRatio.svg" type="image/svg+xml" />
+          </div>
+          <ul class="dropdown-menu">
+              <li><h6 class="dropdown-header">Crop Options</h6></li>
+            <li><a class="dropdown-item CropOptions active" id="NaN" href="#">Custom</a></li>
+            <li><a class="dropdown-item CropOptions" id="1/1" href="#">Square</a></li>
+            <li><a class="dropdown-item CropOptions" id="3/2" href="#">Landscape</a></li>
+            <li><a class="dropdown-item CropOptions" id="4/5" href="#">Potrait</a></li>
+          </ul>
         </div>
       </div>
 
@@ -127,7 +138,7 @@
       </div>
 
       <!-- Crop submenu -->
-      <div class="d-block" id="Crop_submenu">
+      <div class="d-none" id="Crop_submenu">
         <div
           class="d-flex flex-column justify-content-center align-items-center"
           id="ScaleDiv"
@@ -136,15 +147,17 @@
             <div
               class="d-flex justify-content-center align-items-center rs-label"
             >
-              <p id="rs-bullet" class="text-muted mt-3">0</p>
+              <small id="rs-bullet" class="text-muted mt-1 ScaleInput"
+                >20%</small
+              >
             </div>
             <input
               id="rs-range-line"
               class="rs-range w-90"
               type="range"
-              value="0"
-              min="-50"
-              max="50"
+              value="20"
+              min="0"
+              max="100"
             />
           </div>
         </div>

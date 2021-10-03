@@ -5,6 +5,10 @@ import Cropper from "cropperjs";
 // $(".lock").click(function () {
 //   $(this).toggleClass("unlocked");
 // });
+// cache array to undo and redo
+var Undo = [];
+var Redo = [];
+var ind = 0;
 
 const avail_submenu = [
   show_crop_submenu,
@@ -14,6 +18,51 @@ const avail_submenu = [
   show_crop_submenu,
   show_crop_submenu
 ];
+
+// Undo Redo function
+const undo = document.getElementById("undoDiv");
+const redo = document.getElementById("redoDiv");
+const changeUndoDiv = () => {
+  console.log(ind, "ind");
+  function showDiv(div, fl) {
+    if (fl) {
+      div.classList.add("active");
+    } else {
+      div.classList.remove("active");
+    }
+  }
+
+  if (ind !== 0 && Undo.length > 0) {
+    showDiv(undo, 1);
+  } else {
+    showDiv(undo, 0);
+  }
+  if (ind !== Redo.length && Redo.length > 0) {
+    showDiv(redo, 1);
+  } else {
+    showDiv(redo, 0);
+  }
+};
+changeUndoDiv();
+
+//click events
+undo.addEventListener("click", function () {
+  if (ind !== 0 && Undo.length > 0) {
+    ind--;
+    Undo[ind]();
+    console.log(Undo);
+
+    changeUndoDiv();
+  }
+});
+
+redo.addEventListener("click", function () {
+  if (ind !== Redo.length && Redo.length > 0) {
+    Redo[ind++]();
+    // ind++;
+    changeUndoDiv();
+  }
+});
 
 // icon div declarations
 
@@ -48,6 +97,13 @@ function show_crop_submenu(fl) {
 const RotationTag = document.getElementById("RotationTag");
 const zoomTag = document.getElementById("zoomTag");
 
+// slide element declarations
+const slider = document.querySelector(".rs-range");
+var rangeBullet = document.getElementById("rs-bullet");
+var scale_symbol = "%";
+var cached_zoom_value = 20;
+var cached_Rotation_value = 0;
+
 CropIcon.addEventListener("click", function () {
   console.log("in");
   for (var i = 0; i < avail_submenu.length; i++) {
@@ -57,18 +113,37 @@ CropIcon.addEventListener("click", function () {
 });
 
 RotationTag.addEventListener("click", function () {
+  scale_symbol = "°";
+  slider.min = -50;
+  slider.max = 50;
+  slider.value = cached_Rotation_value;
+
+  setBackgroundSize(slider);
+  var bulletPosition = (slider.value - slider.min) * 2.4;
+  rangeBullet.parentElement.style.left = bulletPosition + "px";
+  rangeBullet.innerHTML = slider.value + scale_symbol;
+
   RotationTag.classList.add("active");
   zoomTag.classList.remove("active");
 });
 
 zoomTag.addEventListener("click", function () {
+  scale_symbol = "%";
+  slider.min = 0;
+  slider.max = 100;
+  slider.value = cached_zoom_value;
+
+  setBackgroundSize(slider);
+  var bulletPosition = (slider.value - slider.min) * 2.4;
+  rangeBullet.parentElement.style.left = bulletPosition + "px";
+  rangeBullet.innerHTML = slider.value + scale_symbol;
+
   RotationTag.classList.remove("active");
   zoomTag.classList.add("active");
 });
 
 // Slider js
-const slider = document.querySelector(".rs-range");
-var rangeBullet = document.getElementById("rs-bullet");
+
 function setBackgroundSize(slider) {
   slider.style.setProperty(
     "--background-size",
@@ -82,7 +157,54 @@ slider.addEventListener("input", function () {
   setBackgroundSize(slider);
   var bulletPosition = (slider.value - slider.min) * 2.4;
   rangeBullet.parentElement.style.left = bulletPosition + "px";
-  rangeBullet.innerHTML = slider.value;
+  rangeBullet.innerHTML = slider.value + scale_symbol;
+
+  if (scale_symbol === "%") {
+    cropper.zoomTo(slider.value / 20);
+  } else {
+    cropper.rotateTo(slider.value);
+  }
+});
+
+slider.addEventListener("change", function () {
+  Undo = Undo.slice(0, ind);
+  Redo = Redo.slice(0, ind);
+  if (scale_symbol === "%") {
+    const temp = cached_zoom_value;
+    Undo.push(function () {
+      cropper.zoomTo(temp / 20);
+      cached_zoom_value = temp;
+      zoomTag.click();
+    });
+
+    cached_zoom_value = slider.value;
+
+    const temp1 = cached_zoom_value;
+    Redo.push(function () {
+      cropper.zoomTo(temp1 / 20);
+      cached_zoom_value = temp1;
+      zoomTag.click();
+    });
+  } else {
+    const temp = cached_Rotation_value;
+    Undo.push(function () {
+      cropper.rotateTo(temp);
+      cached_Rotation_value = temp;
+      RotationTag.click();
+    });
+
+    cached_Rotation_value = slider.value;
+
+    const temp1 = cached_Rotation_value;
+    Redo.push(function () {
+      cropper.rotateTo(temp1);
+      cached_Rotation_value = temp1;
+      RotationTag.click();
+    });
+  }
+
+  ind++;
+  changeUndoDiv();
 });
 
 function getBackgroundSize(slider) {
@@ -91,7 +213,6 @@ function getBackgroundSize(slider) {
   const value = +slider.value;
 
   const size = ((value - min) / (max - min)) * 100;
-
   return size;
 }
 
@@ -99,6 +220,7 @@ function getBackgroundSize(slider) {
 
 const cropper = new Cropper(Image_Edit_Preview, {
   // aspectRatio: 16/9,
+  autoCropArea: 0.6,
   crop(event) {
     console.log(event.detail.x);
     // console.log(event.detail.y);
@@ -106,7 +228,7 @@ const cropper = new Cropper(Image_Edit_Preview, {
     // console.log(event.detail.height);
     // console.log(event.detail.rotate);
     // console.log(event.detail.scaleX);
-    // console.log(event.detail.scaleY);
+    // console.log(cropper.getCroppedCanvas());
 
     // cropx = event.detail.x
     // cropy = event.detail.y
@@ -115,5 +237,71 @@ const cropper = new Cropper(Image_Edit_Preview, {
     // image_need_to_send = img
   }
 });
+
+// crop options
+
+const cropOptionsFunction = () => {
+  const cropOptions = document.querySelectorAll(".CropOptions");
+  cropOptions.forEach((el) => {
+    el.addEventListener("click", function () {
+      cropOptions.forEach((i) => {
+        i.classList.remove("active");
+      });
+      el.classList.add("active");
+      cropper.setAspectRatio(parseInt(el.id[0]) / parseInt(el.id[2]));
+    });
+  });
+};
+cropOptionsFunction();
+
+const RotateFunction = () => {
+  document
+    .getElementById("rotate_90Deg_icon")
+    .addEventListener("click", function () {
+      cropper.rotate(90);
+      Undo = Undo.slice(0, ind);
+      Redo = Redo.slice(0, ind);
+      Undo.push(function () {
+        cropper.rotate(-90);
+      });
+      Redo.push(function () {
+        cropper.rotate(90);
+      });
+      // console.log(Undo[0]);
+      ind++;
+      changeUndoDiv();
+    });
+};
+RotateFunction();
+
+const FlipFunction = () => {
+  var flipFL = 0;
+  document.getElementById("Flip_icon").addEventListener("click", function () {
+    Undo = Undo.slice(0, ind);
+    Redo = Redo.slice(0, ind);
+    if (flipFL) {
+      cropper.scaleX(1);
+      flipFL = 0;
+      Undo.push(function () {
+        cropper.scaleX(-1);
+      });
+      Redo.push(function () {
+        cropper.scaleX(1);
+      });
+    } else {
+      cropper.scaleX(-1);
+      flipFL = 1;
+      Undo.push(function () {
+        cropper.scaleX(1);
+      });
+      Redo.push(function () {
+        cropper.scaleX(-1);
+      });
+    }
+    ind++;
+    changeUndoDiv();
+  });
+};
+FlipFunction();
 
 show_crop_submenu(1);
