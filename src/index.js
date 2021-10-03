@@ -10,6 +10,9 @@ var Undo = [];
 var Redo = [];
 var ind = 0;
 
+const okDiv = document.getElementById("okDiv");
+const selectedDiv = "crop";
+
 const avail_submenu = [
   show_crop_submenu,
   show_crop_submenu,
@@ -64,6 +67,16 @@ redo.addEventListener("click", function () {
   }
 });
 
+//ok div
+
+const enableDiableOkDiv = (flag) => {
+  if (flag) {
+    okDiv.classList.add("active");
+  } else {
+    okDiv.classList.remove("active");
+  }
+};
+
 // icon div declarations
 
 const CropIcon = document.getElementById("crop_icon");
@@ -110,198 +123,241 @@ CropIcon.addEventListener("click", function () {
     avail_submenu[i](0);
   }
   show_crop_submenu(1);
-});
+  // cropper js
 
-RotationTag.addEventListener("click", function () {
-  scale_symbol = "°";
-  slider.min = -50;
-  slider.max = 50;
-  slider.value = cached_Rotation_value;
+  const cropper = new Cropper(Image_Edit_Preview, {
+    // aspectRatio: 16/9,
+    autoCropArea: 0.6,
+    viewMode: 3,
+    crop(event) {},
+    cropstart(event) {
+      const cached_crop_data = cropper.getCropBoxData();
 
-  setBackgroundSize(slider);
-  var bulletPosition = (slider.value - slider.min) * 2.4;
-  rangeBullet.parentElement.style.left = bulletPosition + "px";
-  rangeBullet.innerHTML = slider.value + scale_symbol;
-
-  RotationTag.classList.add("active");
-  zoomTag.classList.remove("active");
-});
-
-zoomTag.addEventListener("click", function () {
-  scale_symbol = "%";
-  slider.min = 0;
-  slider.max = 100;
-  slider.value = cached_zoom_value;
-
-  setBackgroundSize(slider);
-  var bulletPosition = (slider.value - slider.min) * 2.4;
-  rangeBullet.parentElement.style.left = bulletPosition + "px";
-  rangeBullet.innerHTML = slider.value + scale_symbol;
-
-  RotationTag.classList.remove("active");
-  zoomTag.classList.add("active");
-});
-
-// Slider js
-
-function setBackgroundSize(slider) {
-  slider.style.setProperty(
-    "--background-size",
-    String(getBackgroundSize(slider)) + "%"
-  );
-}
-
-setBackgroundSize(slider);
-
-slider.addEventListener("input", function () {
-  setBackgroundSize(slider);
-  var bulletPosition = (slider.value - slider.min) * 2.4;
-  rangeBullet.parentElement.style.left = bulletPosition + "px";
-  rangeBullet.innerHTML = slider.value + scale_symbol;
-
-  if (scale_symbol === "%") {
-    cropper.zoomTo(slider.value / 20);
-  } else {
-    cropper.rotateTo(slider.value);
-  }
-});
-
-slider.addEventListener("change", function () {
-  Undo = Undo.slice(0, ind);
-  Redo = Redo.slice(0, ind);
-  if (scale_symbol === "%") {
-    const temp = cached_zoom_value;
-    Undo.push(function () {
-      cropper.zoomTo(temp / 20);
-      cached_zoom_value = temp;
-      zoomTag.click();
-    });
-
-    cached_zoom_value = slider.value;
-
-    const temp1 = cached_zoom_value;
-    Redo.push(function () {
-      cropper.zoomTo(temp1 / 20);
-      cached_zoom_value = temp1;
-      zoomTag.click();
-    });
-  } else {
-    const temp = cached_Rotation_value;
-    Undo.push(function () {
-      cropper.rotateTo(temp);
-      cached_Rotation_value = temp;
-      RotationTag.click();
-    });
-
-    cached_Rotation_value = slider.value;
-
-    const temp1 = cached_Rotation_value;
-    Redo.push(function () {
-      cropper.rotateTo(temp1);
-      cached_Rotation_value = temp1;
-      RotationTag.click();
-    });
-  }
-
-  ind++;
-  changeUndoDiv();
-});
-
-function getBackgroundSize(slider) {
-  const min = +slider.min || 0;
-  const max = +slider.max || 100;
-  const value = +slider.value;
-
-  const size = ((value - min) / (max - min)) * 100;
-  return size;
-}
-
-// cropper js
-
-const cropper = new Cropper(Image_Edit_Preview, {
-  // aspectRatio: 16/9,
-  autoCropArea: 0.6,
-  crop(event) {
-    console.log(event.detail.x);
-    // console.log(event.detail.y);
-    // console.log(event.detail.width);
-    // console.log(event.detail.height);
-    // console.log(event.detail.rotate);
-    // console.log(event.detail.scaleX);
-    // console.log(cropper.getCroppedCanvas());
-
-    // cropx = event.detail.x
-    // cropy = event.detail.y
-    // crop_height = event.detail.height
-    // crop_width = event.detail.width
-    // image_need_to_send = img
-  }
-});
-
-// crop options
-
-const cropOptionsFunction = () => {
-  const cropOptions = document.querySelectorAll(".CropOptions");
-  cropOptions.forEach((el) => {
-    el.addEventListener("click", function () {
-      cropOptions.forEach((i) => {
-        i.classList.remove("active");
-      });
-      el.classList.add("active");
-      cropper.setAspectRatio(parseInt(el.id[0]) / parseInt(el.id[2]));
-    });
-  });
-};
-cropOptionsFunction();
-
-const RotateFunction = () => {
-  document
-    .getElementById("rotate_90Deg_icon")
-    .addEventListener("click", function () {
-      cropper.rotate(90);
       Undo = Undo.slice(0, ind);
-      Redo = Redo.slice(0, ind);
       Undo.push(function () {
-        cropper.rotate(-90);
+        cropper.setCropBoxData(cached_crop_data);
       });
+    },
+    cropend(event) {
+      const croped_data = cropper.getCropBoxData();
+
+      Redo = Redo.slice(0, ind);
       Redo.push(function () {
-        cropper.rotate(90);
+        cropper.setCropBoxData(croped_data);
       });
-      // console.log(Undo[0]);
       ind++;
       changeUndoDiv();
-    });
-};
-RotateFunction();
+    }
+  });
+  RotationTag.addEventListener("click", function () {
+    scale_symbol = "°";
+    slider.min = -50;
+    slider.max = 50;
+    slider.value = cached_Rotation_value;
 
-const FlipFunction = () => {
-  var flipFL = 0;
-  document.getElementById("Flip_icon").addEventListener("click", function () {
+    setBackgroundSize(slider);
+    var bulletPosition = (slider.value - slider.min) * 2.4;
+    rangeBullet.parentElement.style.left = bulletPosition + "px";
+    rangeBullet.innerHTML = slider.value + scale_symbol;
+
+    RotationTag.classList.add("active");
+    zoomTag.classList.remove("active");
+  });
+
+  zoomTag.addEventListener("click", function () {
+    scale_symbol = "%";
+    slider.min = 0;
+    slider.max = 100;
+    slider.value = cached_zoom_value;
+
+    setBackgroundSize(slider);
+    var bulletPosition = (slider.value - slider.min) * 2.4;
+    rangeBullet.parentElement.style.left = bulletPosition + "px";
+    rangeBullet.innerHTML = slider.value + scale_symbol;
+
+    RotationTag.classList.remove("active");
+    zoomTag.classList.add("active");
+  });
+
+  // Slider js
+
+  function setBackgroundSize(slider) {
+    slider.style.setProperty(
+      "--background-size",
+      String(getBackgroundSize(slider)) + "%"
+    );
+  }
+
+  setBackgroundSize(slider);
+
+  slider.addEventListener("input", function () {
+    setBackgroundSize(slider);
+    var bulletPosition = (slider.value - slider.min) * 2.4;
+    rangeBullet.parentElement.style.left = bulletPosition + "px";
+    rangeBullet.innerHTML = slider.value + scale_symbol;
+
+    if (scale_symbol === "%") {
+      cropper.zoomTo(slider.value / 20);
+    } else {
+      cropper.rotateTo(slider.value);
+    }
+  });
+
+  slider.addEventListener("change", function () {
     Undo = Undo.slice(0, ind);
     Redo = Redo.slice(0, ind);
-    if (flipFL) {
-      cropper.scaleX(1);
-      flipFL = 0;
+    if (scale_symbol === "%") {
+      const temp = cached_zoom_value;
       Undo.push(function () {
-        cropper.scaleX(-1);
+        cropper.zoomTo(temp / 20);
+        cached_zoom_value = temp;
+        zoomTag.click();
       });
+
+      cached_zoom_value = slider.value;
+
+      const temp1 = cached_zoom_value;
       Redo.push(function () {
-        cropper.scaleX(1);
+        cropper.zoomTo(temp1 / 20);
+        cached_zoom_value = temp1;
+        zoomTag.click();
       });
     } else {
-      cropper.scaleX(-1);
-      flipFL = 1;
+      const temp = cached_Rotation_value;
       Undo.push(function () {
-        cropper.scaleX(1);
+        cropper.rotateTo(temp);
+        cached_Rotation_value = temp;
+        RotationTag.click();
       });
+
+      cached_Rotation_value = slider.value;
+
+      const temp1 = cached_Rotation_value;
       Redo.push(function () {
-        cropper.scaleX(-1);
+        cropper.rotateTo(temp1);
+        cached_Rotation_value = temp1;
+        RotationTag.click();
       });
     }
+
     ind++;
     changeUndoDiv();
   });
-};
-FlipFunction();
 
-show_crop_submenu(1);
+  function getBackgroundSize(slider) {
+    const min = +slider.min || 0;
+    const max = +slider.max || 100;
+    const value = +slider.value;
+
+    const size = ((value - min) / (max - min)) * 100;
+    return size;
+  }
+
+  // crop options
+
+  const cropOptionsFunction = () => {
+    const cropOptions = document.querySelectorAll(".CropOptions");
+    cropOptions.forEach((el) => {
+      el.addEventListener("click", function () {
+        cropOptions.forEach((i) => {
+          i.classList.remove("active");
+        });
+        el.classList.add("active");
+        cropper.setAspectRatio(parseInt(el.id[0]) / parseInt(el.id[2]));
+      });
+    });
+  };
+  cropOptionsFunction();
+
+  const RotateFunction = () => {
+    document
+      .getElementById("rotate_90Deg_icon")
+      .addEventListener("click", function () {
+        cropper.rotate(90);
+        Undo = Undo.slice(0, ind);
+        Redo = Redo.slice(0, ind);
+        Undo.push(function () {
+          cropper.rotate(-90);
+        });
+        Redo.push(function () {
+          cropper.rotate(90);
+        });
+        // console.log(Undo[0]);
+        ind++;
+        changeUndoDiv();
+      });
+  };
+  RotateFunction();
+
+  const FlipFunction = () => {
+    var flipFL = 0;
+    document.getElementById("Flip_icon").addEventListener("click", function () {
+      Undo = Undo.slice(0, ind);
+      Redo = Redo.slice(0, ind);
+      if (flipFL) {
+        cropper.scaleX(1);
+        flipFL = 0;
+        Undo.push(function () {
+          cropper.scaleX(-1);
+        });
+        Redo.push(function () {
+          cropper.scaleX(1);
+        });
+      } else {
+        cropper.scaleX(-1);
+        flipFL = 1;
+        Undo.push(function () {
+          cropper.scaleX(1);
+        });
+        Redo.push(function () {
+          cropper.scaleX(-1);
+        });
+      }
+      ind++;
+      changeUndoDiv();
+    });
+  };
+  FlipFunction();
+
+  okDiv.addEventListener("click", function () {
+    const boxData = cropper.getCropBoxData();
+    const OldData = cropper.getCanvasData();
+    console.log('hi',cropper.getCroppedCanvas({
+      minWidth: 256,
+      minHeight: 256,
+      maxWidth: 4096,
+      maxHeight: 4096,
+      fillColor: '#fff',
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+  }));
+  ImagePreviewDiv.document.write('<img src="' + cropper.getCroppedCanvas({
+    minWidth: 256,
+    minHeight: 256,
+    maxWidth: 4096,
+    maxHeight: 4096,
+    fillColor: '#fff',
+    imageSmoothingEnabled: true,
+    imageSmoothingQuality: 'high',
+}) + '">');
+      
+    console.log(Image_Edit_Preview.src);
+    Undo = Undo.slice(0, ind);
+    Redo = Redo.slice(0, ind);
+    Undo.push(function () {
+      cropper.setCanvasData(OldData);
+      cropper.setCropBoxData(boxData);
+    });
+    Redo.push(function () {
+      cropper.setCanvasData(boxData);
+    });
+    // console.log(Undo[0]);
+    ind++;
+    changeUndoDiv();
+  });
+});
+
+const saveImg = () => {};
+saveImg();
+
+// show_crop_submenu(1);
