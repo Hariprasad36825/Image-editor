@@ -92,11 +92,23 @@
             <img src="src/SetRatio.svg" type="image/svg+xml" />
           </div>
           <ul class="dropdown-menu">
-              <li><h6 class="dropdown-header">Crop Options</h6></li>
-            <li><a class="dropdown-item CropOptions active" id="NaN" href="#">Custom</a></li>
-            <li><a class="dropdown-item CropOptions" id="1/1" href="#">Square</a></li>
-            <li><a class="dropdown-item CropOptions" id="3/2" href="#">Landscape</a></li>
-            <li><a class="dropdown-item CropOptions" id="4/5" href="#">Potrait</a></li>
+            <li><h6 class="dropdown-header">Crop Options</h6></li>
+            <li>
+              <a class="dropdown-item CropOptions active" id="NaN" href="#"
+                >Custom</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item CropOptions" id="1/1" href="#">Square</a>
+            </li>
+            <li>
+              <a class="dropdown-item CropOptions" id="3/2" href="#"
+                >Landscape</a
+              >
+            </li>
+            <li>
+              <a class="dropdown-item CropOptions" id="4/5" href="#">Potrait</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -178,24 +190,32 @@
 
       <div class="d-none" id="Adjust_submenu">
         <div
-          class="d-flex flex-column justify-content-center ScaleDiv"
+          class="d-flex flex-column justify-content-center align-items-center"
           id="ScaleDiv"
         >
-          <!-- <button class="btn btn-light reset_button" type="button" disabled="">|</button>
-              <span class="text-muted ScaleInput">0°</span>
-              <div class="Scale">
-                  <svg width="404" height="56" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 404 56" aria-hidden="true" focusable="false">
-                    <path d="M202 24 l2 3 l-2 -1 l-2 1 z"></path>
-                    <rect rx="4" ry="4" y="24" "="" height="8"></rect>
-                    <path fill-rule="evenodd" d="M 0 28 a 2 2 0 1 0 0 -1 M 11.25 28 a 0.75 0.75 0 1 0 0 -1 M 21.25 28 a 0.75 0.75 0 1 0 0 -1 M 31.25 28 a 0.75 0.75 0 1 0 0 -1 M 41.25 28 a 0.75 0.75 0 1 0 0 -1 M 50 28 a 2 2 0 1 0 0 -1 M 61.25 28 a 0.75 0.75 0 1 0 0 -1 M 71.25 28 a 0.75 0.75 0 1 0 0 -1 M 81.25 28 a 0.75 0.75 0 1 0 0 -1 M 91.25 28 a 0.75 0.75 0 1 0 0 -1 M 100 28 a 2 2 0 1 0 0 -1 M 111.25 28 a 0.75 0.75 0 1 0 0 -1 M 121.25 28 a 0.75 0.75 0 1 0 0 -1 M 131.25 28 a 0.75 0.75 0 1 0 0 -1 M 141.25 28 a 0.75 0.75 0 1 0 0 -1 M 150 28 a 2 2 0 1 0 0 -1 M 161.25 28 a 0.75 0.75 0 1 0 0 -1 M 171.25 28 a 0.75 0.75 0 1 0 0 -1 M 181.25 28 a 0.75 0.75 0 1 0 0 -1 M 191.25 28 a 0.75 0.75 0 1 0 0 -1 M 200 28 a 2 2 0 1 0 0 -1 M 211.25 28 a 0.75 0.75 0 1 0 0 -1 M 221.25 28 a 0.75 0.75 0 1 0 0 -1 M 231.25 28 a 0.75 0.75 0 1 0 0 -1 M 241.25 28 a 0.75 0.75 0 1 0 0 -1 M 250 28 a 2 2 0 1 0 0 -1 M 261.25 28 a 0.75 0.75 0 1 0 0 -1 M 271.25 28 a 0.75 0.75 0 1 0 0 -1 M 281.25 28 a 0.75 0.75 0 1 0 0 -1 M 291.25 28 a 0.75 0.75 0 1 0 0 -1 M 300 28 a 2 2 0 1 0 0 -1 M 311.25 28 a 0.75 0.75 0 1 0 0 -1 M 321.25 28 a 0.75 0.75 0 1 0 0 -1 M 331.25 28 a 0.75 0.75 0 1 0 0 -1 M 341.25 28 a 0.75 0.75 0 1 0 0 -1 M 350 28 a 2 2 0 1 0 0 -1 M 361.25 28 a 0.75 0.75 0 1 0 0 -1 M 371.25 28 a 0.75 0.75 0 1 0 0 -1 M 381.25 28 a 0.75 0.75 0 1 0 0 -1 M 391.25 28 a 0.75 0.75 0 1 0 0 -1 M 400 28 a 2 2 0 1 0 0 -1"></path>
-                  </svg>
-              </div> -->
+          <div class="range-slider d-flex flex-column my-1">
+            <div
+              class="d-flex justify-content-center align-items-center rs-label"
+            >
+              <small id="rs-bullet" class="text-muted mt-1 ScaleInput"
+                >0%</small
+              >
+            </div>
+            <input
+              id="rs-range-line"
+              class="rs-range w-90"
+              type="range"
+              value="0"
+              min="0"
+              max="100"
+            />
+          </div>
         </div>
 
         <div class="d-flex justify-content-center">
           <div
             class="d-flex flex-row align-items-center w-90 TagDiv"
-            id="CropTagContainer"
+            id="AdjustTagContainer"
           >
             <small class="text-muted mx-1 Tag active" id="BrightnessTag"
               >Brightness</small

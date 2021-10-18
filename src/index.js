@@ -12,10 +12,11 @@ var ind = 0;
 
 const okDiv = document.getElementById("okDiv");
 const selectedDiv = "crop";
+var cropper;
 
 const avail_submenu = [
   show_crop_submenu,
-  show_crop_submenu,
+  show_adjust_submenu,
   show_crop_submenu,
   show_crop_submenu,
   show_crop_submenu,
@@ -80,14 +81,34 @@ const enableDiableOkDiv = (flag) => {
 // icon div declarations
 
 const CropIcon = document.getElementById("crop_icon");
+const AdjustIcon = document.getElementById("adjust_icon");
+const AnnotateIcon = document.getElementById("annotate_icon");
+const FilterIcon = document.getElementById("filter_icon");
+const StickerIcon = document.getElementById("sticker_icon");
+const FrameIcon = document.getElementById("frame_icon");
+const ResizeIcon = document.getElementById("resize_icon");
 
 // submenu declarations
 
 const CropDiv = document.getElementById("Crop_submenu");
 const AddCropDiv = document.getElementById("crop_addtional_menu");
 
+const AdjustDiv = document.getElementById("Adjust_submenu");
+
 const ImagePreviewDiv = document.getElementById("ImagePreview");
 const Image_Edit_Preview = document.getElementById("Image_Edit_Preview");
+
+// slide element declarations
+const slider = document.querySelector(".rs-range");
+var rangeBullet = document.getElementById("rs-bullet");
+var scale_symbol = "%";
+var cached_zoom_value = 20;
+var cached_Rotation_value = 0;
+var cancrop = 0;
+
+// function RemoveEventListenerForSlider(){
+//   slider.removeEventListener("input", )
+// }
 
 function show_crop_submenu(fl) {
   if (fl) {
@@ -96,28 +117,99 @@ function show_crop_submenu(fl) {
     ImagePreviewDiv.style.marginTop = ".3rem";
     AddCropDiv.classList.remove("d-none");
     AddCropDiv.classList.add("d-flex");
+    rangeBullet.parentElement.style.left = "59px";
   } else {
     CropDiv.classList.add("d-none");
     CropDiv.classList.remove("d-block");
-    ImagePreviewDiv.style.marginTop = "calc(0.5rem + 40px);";
+    ImagePreviewDiv.style.marginTop = "45px";
     AddCropDiv.classList.add("d-none");
     AddCropDiv.classList.remove("d-flex");
+    rangeBullet.parentElement.style.left = "0px";
+    try {
+      cropper.destroy();
+    } catch (error) {}
   }
 }
+
+function show_adjust_submenu(fl) {
+  if (fl) {
+    AdjustDiv.classList.remove("d-none");
+    AdjustDiv.classList.add("d-block");
+  } else {
+    AdjustDiv.classList.add("d-none");
+    AdjustDiv.classList.remove("d-block");
+  }
+}
+
+// Slider js
+
+function setBackgroundSize(slider) {
+  slider.style.setProperty(
+    "--background-size",
+    String(getBackgroundSize(slider)) + "%"
+  );
+}
+
+function getBackgroundSize(slider) {
+  const min = +slider.min || 0;
+  const max = +slider.max || 100;
+  const value = +slider.value;
+
+  const size = ((value - min) / (max - min)) * 100;
+  return size;
+}
+
+function scrollHorizontally(e) {
+  e = window.event || e;
+  var delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.detail));
+  document.getElementById("AdjustTagContainer").scrollLeft -= delta * 40; // Multiplied by 40
+  e.preventDefault();
+}
+
+function doScrollHorizontally(id) {
+  if (document.getElementById(id).addEventListener) {
+    // IE9, Chrome, Safari, Opera
+    document
+      .getElementById(id)
+      .addEventListener("mousewheel", scrollHorizontally, false);
+    // Firefox
+    document
+      .getElementById(id)
+      .addEventListener("DOMMouseScroll", scrollHorizontally, false);
+  } else {
+    // IE 6/7/8
+    document.getElementById(id).attachEvent("onmousewheel", scrollHorizontally);
+  }
+}
+
+// Horizontal Scrollable tags
+doScrollHorizontally("AdjustTagContainer");
 
 // js for crop
 // tag div declarations
 const RotationTag = document.getElementById("RotationTag");
 const zoomTag = document.getElementById("zoomTag");
 
-// slide element declarations
-const slider = document.querySelector(".rs-range");
-var rangeBullet = document.getElementById("rs-bullet");
-var scale_symbol = "%";
-var cached_zoom_value = 20;
-var cached_Rotation_value = 0;
+const BrightnessTag = document.getElementById("BrightnessTag");
+const ContrastTag = document.getElementById("ContrastTag");
+const SaturationTag = document.getElementById("SaturationTag");
+const ExposureTag = document.getElementById("ExposureTag");
+const TemperatureTag = document.getElementById("TemperatureTag");
+const GammaTag = document.getElementById("GammaTag");
+const ClarityTag = document.getElementById("ClarityTag");
+const VignetteTag = document.getElementById("VignetteTag");
+
+//change Active tag
+function changeActiveForTags(id) {
+  let tags = document.querySelectorAll(".Tag");
+  tags.forEach((el) => {
+    el.classList.remove("active");
+  });
+  id.classList.add("active");
+}
 
 CropIcon.addEventListener("click", function () {
+  cancrop = 1;
   console.log("in");
   for (var i = 0; i < avail_submenu.length; i++) {
     avail_submenu[i](0);
@@ -125,7 +217,11 @@ CropIcon.addEventListener("click", function () {
   show_crop_submenu(1);
   // cropper js
 
-  const cropper = new Cropper(Image_Edit_Preview, {
+  var imageDiv =
+    Image_Edit_Preview.classList.length === 1
+      ? Image_Edit_Preview
+      : document.getElementById("CroppedImage_Edit_Preview");
+  cropper = new Cropper(imageDiv, {
     // aspectRatio: 16/9,
     autoCropArea: 0.6,
     viewMode: 3,
@@ -180,13 +276,6 @@ CropIcon.addEventListener("click", function () {
   });
 
   // Slider js
-
-  function setBackgroundSize(slider) {
-    slider.style.setProperty(
-      "--background-size",
-      String(getBackgroundSize(slider)) + "%"
-    );
-  }
 
   setBackgroundSize(slider);
 
@@ -243,15 +332,6 @@ CropIcon.addEventListener("click", function () {
     ind++;
     changeUndoDiv();
   });
-
-  function getBackgroundSize(slider) {
-    const min = +slider.min || 0;
-    const max = +slider.max || 100;
-    const value = +slider.value;
-
-    const size = ((value - min) / (max - min)) * 100;
-    return size;
-  }
 
   // crop options
 
@@ -318,44 +398,94 @@ CropIcon.addEventListener("click", function () {
     });
   };
   FlipFunction();
+});
 
-  okDiv.addEventListener("click", function () {
-    const boxData = cropper.getCropBoxData();
-    const OldData = cropper.getCanvasData();
-    console.log('hi',cropper.getCroppedCanvas({
-      minWidth: 256,
-      minHeight: 256,
-      maxWidth: 4096,
-      maxHeight: 4096,
-      fillColor: '#fff',
-      imageSmoothingEnabled: true,
-      imageSmoothingQuality: 'high',
-  }));
-  ImagePreviewDiv.document.write('<img src="' + cropper.getCroppedCanvas({
-    minWidth: 256,
-    minHeight: 256,
-    maxWidth: 4096,
-    maxHeight: 4096,
-    fillColor: '#fff',
-    imageSmoothingEnabled: true,
-    imageSmoothingQuality: 'high',
-}) + '">');
-      
-    console.log(Image_Edit_Preview.src);
-    Undo = Undo.slice(0, ind);
-    Redo = Redo.slice(0, ind);
-    Undo.push(function () {
-      cropper.setCanvasData(OldData);
-      cropper.setCropBoxData(boxData);
-    });
-    Redo.push(function () {
-      cropper.setCanvasData(boxData);
-    });
-    // console.log(Undo[0]);
-    ind++;
-    changeUndoDiv();
+AdjustIcon.addEventListener("click", function () {
+  for (var i = 0; i < avail_submenu.length; i++) {
+    avail_submenu[i](0);
+  }
+  show_adjust_submenu(1);
+
+  BrightnessTag.addEventListener("click", function () {
+    changeActiveForTags(BrightnessTag);
+  });
+
+  slider.addEventListener("input", function () {
+    setBackgroundSize(slider);
+    // var bulletPosition = (slider.value - slider.min) * 2.4;
+    // rangeBullet.parentElement.style.left = bulletPosition + "px";
+    // rangeBullet.innerHTML = slider.value + scale_symbol;
+
+    // if (scale_symbol === "%") {
+    //   cropper.zoomTo(slider.value / 20);
+    // } else {
+    //   cropper.rotateTo(slider.value);
+    // }
+    console.log("hi");
   });
 });
+
+const updateOKDiv = () => {
+  if (cancrop) {
+    okDiv.classList.add("active");
+    okDiv.addEventListener("click", function () {
+      const boxData = cropper.getCropBoxData();
+      const canvas = cropper.getCroppedCanvas({
+        minWidth: 200,
+        minHeight: 200,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        fillColor: "#fff",
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: "low"
+      });
+      cropper.destroy();
+      show_crop_submenu(0);
+      console.log(boxData, canvas);
+
+      const cropped_Image = document.getElementById(
+        "CroppedImage_Edit_Preview"
+      );
+      if (cropped_Image) {
+        ImagePreviewDiv.removeChild(cropped_Image);
+        console.log(ImagePreviewDiv, cropped_Image, canvas);
+      }
+      canvas.classList.add("Image_Edit_Preview");
+      canvas.id = "CroppedImage_Edit_Preview";
+
+      Image_Edit_Preview.classList.add("d-none");
+      ImagePreviewDiv.appendChild(canvas);
+
+      console.log(Image_Edit_Preview.src);
+      Undo = Undo.slice(0, ind);
+      Redo = Redo.slice(0, ind);
+
+      const croppedImage = document.getElementById("CroppedImage_Edit_Preview");
+      Undo.push(function () {
+        Image_Edit_Preview.src += "?t=" + new Date().getTime();
+        croppedImage.classList.add("d-none");
+        Image_Edit_Preview.classList.remove("d-none");
+        CropIcon.click();
+        cached_zoom_value = 20;
+        zoomTag.click();
+        console.log(ImagePreviewDiv);
+        cropper.setCropBoxData(boxData);
+      });
+
+      Redo.push(function () {
+        croppedImage.classList.remove("d-none");
+        Image_Edit_Preview.classList.add("d-none");
+        show_crop_submenu(0);
+        cropper.destroy();
+      });
+      // console.log(Undo[0]);
+      ind++;
+      changeUndoDiv();
+    });
+  } else {
+    okDiv.classList.remove("active");
+  }
+};
 
 const saveImg = () => {};
 saveImg();
