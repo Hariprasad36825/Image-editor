@@ -97,9 +97,10 @@ const AdjustDiv = document.getElementById("Adjust_submenu");
 
 const ImagePreviewDiv = document.getElementById("ImagePreview");
 const Image_Edit_Preview = document.getElementById("Image_Edit_Preview");
+var currentImg = Image_Edit_Preview;
 
 // slide element declarations
-const slider = document.querySelector(".rs-range");
+var slider = document.querySelector(".rs-range");
 var rangeBullet = document.getElementById("rs-bullet");
 var scale_symbol = "%";
 var cached_zoom_value = 20;
@@ -195,9 +196,9 @@ const ContrastTag = document.getElementById("ContrastTag");
 const SaturationTag = document.getElementById("SaturationTag");
 const ExposureTag = document.getElementById("ExposureTag");
 const TemperatureTag = document.getElementById("TemperatureTag");
-const GammaTag = document.getElementById("GammaTag");
-const ClarityTag = document.getElementById("ClarityTag");
-const VignetteTag = document.getElementById("VignetteTag");
+const GreyScaleTag = document.getElementById("GreyScaleTag");
+const BlurTag = document.getElementById("ClarityTag");
+const InvertTag = document.getElementById("InvertTag");
 
 //change Active tag
 function changeActiveForTags(id) {
@@ -405,23 +406,75 @@ AdjustIcon.addEventListener("click", function () {
     avail_submenu[i](0);
   }
   show_adjust_submenu(1);
+  var sliderControl = BrightnessTag;
+
+  AdjustDiv.querySelectorAll(".Tag").forEach((el) => {
+    el.addEventListener("click", function () {
+      changeActiveForTags(el);
+      sliderControl = el;
+    });
+  });
 
   BrightnessTag.addEventListener("click", function () {
     changeActiveForTags(BrightnessTag);
+    sliderControl = BrightnessTag;
   });
+
+  slider = AdjustDiv.querySelector(".rs-range");
+  rangeBullet = AdjustDiv.querySelector("#rs-bullet");
 
   slider.addEventListener("input", function () {
     setBackgroundSize(slider);
-    // var bulletPosition = (slider.value - slider.min) * 2.4;
-    // rangeBullet.parentElement.style.left = bulletPosition + "px";
-    // rangeBullet.innerHTML = slider.value + scale_symbol;
+    var bulletPosition = (slider.value - slider.min) * 2.4;
+    rangeBullet.parentElement.style.left = bulletPosition + "px";
+    rangeBullet.innerHTML = slider.value + "%";
 
-    // if (scale_symbol === "%") {
-    //   cropper.zoomTo(slider.value / 20);
-    // } else {
-    //   cropper.rotateTo(slider.value);
-    // }
-    console.log("hi");
+    switch (sliderControl.id) {
+      case "BrightnessTag":
+        currentImg.style.filter =
+          "brightness(" + (100 + parseInt(slider.value, 10)) + "%)";
+        break;
+      case "ContrastTag":
+        currentImg.style.filter =
+          "contrast(" + (100 + parseInt(slider.value, 10)) + "%)";
+        break;
+      case "SaturationTag":
+        currentImg.style.filter =
+          "saturate(" + (100 + parseInt(slider.value, 10)) + "%)";
+        break;
+      case "ExposureTag":
+        currentImg.style.filter =
+          "contrast(" +
+          (100 + parseInt(slider.value / 2, 10)) +
+          "%)" +
+          "brightness(" +
+          (100 + parseInt(slider.value / 2, 10)) +
+          "%)";
+        break;
+      case "TemperatureTag":
+        currentImg.style.filter =
+          "sepia(" +
+          parseInt(slider.value / 2, 10) +
+          "%)" +
+          "saturate(" +
+          (100 + parseInt(slider.value, 10)) +
+          "%)";
+
+        break;
+      case "GreyScaleTag":
+        currentImg.style.filter =
+          "grayscale(" + parseInt(slider.value, 10) + "%)";
+        break;
+      case "BlurTag":
+        currentImg.style.filter =
+          "blur(" + parseInt(slider.value / 20, 10) + "px)";
+        break;
+      case "InvertTag":
+        currentImg.style.filter = "invert(" + parseInt(slider.value, 10) + "%)";
+        break;
+      default:
+        break;
+    }
   });
 });
 
@@ -446,6 +499,7 @@ const updateOKDiv = () => {
       const cropped_Image = document.getElementById(
         "CroppedImage_Edit_Preview"
       );
+      currentImg = cropped_Image;
       if (cropped_Image) {
         ImagePreviewDiv.removeChild(cropped_Image);
         console.log(ImagePreviewDiv, cropped_Image, canvas);
@@ -462,6 +516,7 @@ const updateOKDiv = () => {
 
       const croppedImage = document.getElementById("CroppedImage_Edit_Preview");
       Undo.push(function () {
+        currentImg = Image_Edit_Preview;
         Image_Edit_Preview.src += "?t=" + new Date().getTime();
         croppedImage.classList.add("d-none");
         Image_Edit_Preview.classList.remove("d-none");
@@ -473,6 +528,7 @@ const updateOKDiv = () => {
       });
 
       Redo.push(function () {
+        currentImg = croppedImage;
         croppedImage.classList.remove("d-none");
         Image_Edit_Preview.classList.add("d-none");
         show_crop_submenu(0);
