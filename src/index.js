@@ -107,10 +107,6 @@ var cached_zoom_value = 20;
 var cached_Rotation_value = 0;
 var cancrop = 0;
 
-// function RemoveEventListenerForSlider(){
-//   slider.removeEventListener("input", )
-// }
-
 function show_crop_submenu(fl) {
   if (fl) {
     CropDiv.classList.remove("d-none");
@@ -192,17 +188,36 @@ const RotationTag = document.getElementById("RotationTag");
 const zoomTag = document.getElementById("zoomTag");
 
 const BrightnessTag = document.getElementById("BrightnessTag");
-const ContrastTag = document.getElementById("ContrastTag");
-const SaturationTag = document.getElementById("SaturationTag");
-const ExposureTag = document.getElementById("ExposureTag");
-const TemperatureTag = document.getElementById("TemperatureTag");
-const GreyScaleTag = document.getElementById("GreyScaleTag");
-const BlurTag = document.getElementById("ClarityTag");
-const InvertTag = document.getElementById("InvertTag");
+// const ContrastTag = document.getElementById("ContrastTag");
+// const SaturationTag = document.getElementById("SaturationTag");
+// const ExposureTag = document.getElementById("ExposureTag");
+// const TemperatureTag = document.getElementById("TemperatureTag");
+// const GreyScaleTag = document.getElementById("GreyScaleTag");
+// const BlurTag = document.getElementById("BlurTag");
+// const InvertTag = document.getElementById("InvertTag");
+
+const cachedTagValues = {
+  BrightnessTag: 0,
+  ContrastTag: 0,
+  SaturationTag: 0,
+  ExposureTag: 0,
+  TemperatureTag: 0,
+  GreyScaleTag: 0,
+  BlurTag: 0,
+  InvertTag: 0
+};
 
 //change Active tag
 function changeActiveForTags(id) {
   let tags = document.querySelectorAll(".Tag");
+  // console.log(id);
+
+  slider.value = cachedTagValues[id.id];
+  setBackgroundSize(slider);
+  var bulletPosition = (slider.value - slider.min) * 2.4;
+  rangeBullet.parentElement.style.left = bulletPosition + "px";
+  rangeBullet.innerHTML = slider.value + scale_symbol;
+
   tags.forEach((el) => {
     el.classList.remove("active");
   });
@@ -415,14 +430,27 @@ AdjustIcon.addEventListener("click", function () {
     });
   });
 
-  BrightnessTag.addEventListener("click", function () {
-    changeActiveForTags(BrightnessTag);
-    sliderControl = BrightnessTag;
-  });
-
   slider = AdjustDiv.querySelector(".rs-range");
   rangeBullet = AdjustDiv.querySelector("#rs-bullet");
 
+  //apply filter function
+  var filter = {};
+  var cachedFilter = {};
+
+  const addfilter = (filter) => {
+    var fl = 0;
+    var tmp = "";
+
+    for (var i in filter) {
+      tmp += i + "(" + filter[i] + ") ";
+      fl = 1;
+    }
+
+    currentImg.style.filter = tmp;
+    if (!fl) {
+      currentImg.style.filter = "";
+    }
+  };
   slider.addEventListener("input", function () {
     setBackgroundSize(slider);
     var bulletPosition = (slider.value - slider.min) * 2.4;
@@ -431,50 +459,83 @@ AdjustIcon.addEventListener("click", function () {
 
     switch (sliderControl.id) {
       case "BrightnessTag":
-        currentImg.style.filter =
-          "brightness(" + (100 + parseInt(slider.value, 10)) + "%)";
+        filter["brightness"] = 100 + parseInt(slider.value, 10) + "%";
+        addfilter(filter);
         break;
       case "ContrastTag":
-        currentImg.style.filter =
-          "contrast(" + (100 + parseInt(slider.value, 10)) + "%)";
+        filter["contrast"] = 100 + parseInt(slider.value, 10) + "%";
+        addfilter(filter);
         break;
       case "SaturationTag":
-        currentImg.style.filter =
-          "saturate(" + (100 + parseInt(slider.value, 10)) + "%)";
+        filter["saturate"] = 100 + parseInt(slider.value, 10) + "%";
+        addfilter(filter);
         break;
       case "ExposureTag":
-        currentImg.style.filter =
-          "contrast(" +
-          (100 + parseInt(slider.value / 2, 10)) +
-          "%)" +
-          "brightness(" +
-          (100 + parseInt(slider.value / 2, 10)) +
-          "%)";
+        filter["contrast"] = 100 + parseInt(slider.value / 2, 10) + "%";
+        filter["brightness"] = 100 + parseInt(slider.value / 2, 10) + "%";
+        addfilter(filter);
         break;
       case "TemperatureTag":
-        currentImg.style.filter =
-          "sepia(" +
-          parseInt(slider.value / 2, 10) +
-          "%)" +
-          "saturate(" +
-          (100 + parseInt(slider.value, 10)) +
-          "%)";
-
+        filter["sepia"] = 100 + parseInt(slider.value / 2, 10) + "%";
+        filter["saturate"] = 100 + parseInt(slider.value, 10) + "%";
+        addfilter(filter);
         break;
       case "GreyScaleTag":
-        currentImg.style.filter =
-          "grayscale(" + parseInt(slider.value, 10) + "%)";
+        filter["grayscale"] = parseInt(slider.value, 10) + "%";
+        addfilter(filter);
         break;
       case "BlurTag":
-        currentImg.style.filter =
-          "blur(" + parseInt(slider.value / 20, 10) + "px)";
+        filter["blur"] = parseInt(slider.value / 20, 10) + "px";
+        addfilter(filter);
         break;
       case "InvertTag":
-        currentImg.style.filter = "invert(" + parseInt(slider.value, 10) + "%)";
+        filter["invert"] = parseInt(slider.value, 10) + "%";
+        addfilter(filter);
         break;
       default:
         break;
     }
+  });
+
+  slider.addEventListener("change", function () {
+    Undo = Undo.slice(0, ind);
+    Redo = Redo.slice(0, ind);
+
+    const previousFilter = cachedFilter;
+    const currentSlider = sliderControl.id;
+    const temp = cachedTagValues[currentSlider];
+
+    console.log(previousFilter, filter);
+
+    Undo.push(function () {
+      addfilter(previousFilter);
+      slider.value = temp;
+      setBackgroundSize(slider);
+      var bulletPosition = (slider.value - slider.min) * 2.4;
+      rangeBullet.parentElement.style.left = bulletPosition + "px";
+      rangeBullet.innerHTML = slider.value + scale_symbol;
+      cachedTagValues[currentSlider] = temp;
+    });
+
+    chachedScaleValue = slider.value;
+    cachedFilter = { ...filter };
+
+    const temp1 = slider.value;
+    const currentFilter = { ...filter };
+    Redo.push(function () {
+      addfilter(currentFilter);
+      slider.value = temp1;
+      setBackgroundSize(slider);
+      var bulletPosition = (slider.value - slider.min) * 2.4;
+      rangeBullet.parentElement.style.left = bulletPosition + "px";
+      rangeBullet.innerHTML = slider.value + scale_symbol;
+      cachedTagValues[currentSlider] = temp1;
+    });
+
+    cachedTagValues[sliderControl.id] = slider.value;
+
+    ind++;
+    changeUndoDiv();
   });
 });
 
