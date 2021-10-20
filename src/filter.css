@@ -1,5 +1,5 @@
 .chrome {
-  filter: contrast(200%);
+  filter: saturate(170%);
 }
 
 .Fade {
@@ -7,7 +7,7 @@
 }
 
 .cold {
-  filter: hue-rotate(180deg) sepia(75%) contrast(150%) saturate(300%)
+  filter: hue-rotate(180deg) sepia(75%) contrast(100%) saturate(300%)
     hue-rotate(180deg);
 }
 
