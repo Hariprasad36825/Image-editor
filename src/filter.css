@@ -1,3 +1,7 @@
+.Default {
+  filter: "";
+}
+
 .chrome {
   filter: saturate(170%);
 }

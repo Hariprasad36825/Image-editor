@@ -562,32 +562,41 @@ FilterIcon.addEventListener("click", function () {
 
 
   let filters = document.querySelectorAll(".filter_preview");
-  let AppliedcustomFilter = window.getComputedStyle(document.querySelector('.chrome')).getPropertyValue('filter')
-
+  let AppliedcustomFilter = window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter')
+  AppliedcustomFilter = AppliedcustomFilter !== 'none' ? AppliedcustomFilter : '';
   filters.forEach((el) => {
-    document.querySelector('.'+el.id).style.filter += AppliedcustomFilter
 
     el.addEventListener("click", () => {
+
+      Image_Edit_Preview.style.removeProperty('filter');
+
       changeActiveFilter(el);
-      Image_Edit_Preview.classList.remove(addedFilter);
-      Image_Edit_Preview.classList.add(el.id);
+
+      console.log(window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter'), 'in')
+
+      Image_Edit_Preview.style.filter = AppliedcustomFilter+ window.getComputedStyle(document.querySelector('.'+el.id)).getPropertyValue('filter')
+
+      console.log(window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter'), 'in')
+
 
       Undo = Undo.slice(0, ind);
       Redo = Redo.slice(0, ind);
 
-      const tmp = addedFilter;
+      const tmp2 = addedFilter;
       const tmp1 = el.id;
       // const cur_el = el;
 
       Undo.push(function () {
-        Image_Edit_Preview.classList.remove(el.id);
-        Image_Edit_Preview.classList.add(tmp);
-        changeActiveFilter(document.getElementById(tmp));
+        let tmp = window.getComputedStyle(document.querySelector('.'+tmp2)).getPropertyValue('filter');
+        tmp = tmp !== 'none' ? tmp : ''
+        Image_Edit_Preview.style.filter = AppliedcustomFilter+tmp
+        changeActiveFilter(document.getElementById(tmp2));
       });
 
       Redo.push(function () {
-        Image_Edit_Preview.classList.remove(tmp);
-        Image_Edit_Preview.classList.add(tmp1);
+        let tmp = window.getComputedStyle(document.querySelector('.'+tmp1)).getPropertyValue('filter');
+        tmp = tmp !== 'none' ? tmp : ''
+        Image_Edit_Preview.style.filter = AppliedcustomFilter+tmp
         changeActiveFilter(document.getElementById(tmp1));
       });
 
