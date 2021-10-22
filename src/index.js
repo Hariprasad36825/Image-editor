@@ -185,13 +185,6 @@ const RotationTag = document.getElementById("RotationTag");
 const zoomTag = document.getElementById("zoomTag");
 
 const BrightnessTag = document.getElementById("BrightnessTag");
-// const ContrastTag = document.getElementById("ContrastTag");
-// const SaturationTag = document.getElementById("SaturationTag");
-// const ExposureTag = document.getElementById("ExposureTag");
-// const TemperatureTag = document.getElementById("TemperatureTag");
-// const GreyScaleTag = document.getElementById("GreyScaleTag");
-// const BlurTag = document.getElementById("BlurTag");
-// const InvertTag = document.getElementById("InvertTag");
 
 const cachedTagValues = {
   BrightnessTag: 0,
@@ -424,6 +417,26 @@ CropIcon.addEventListener("click", function () {
   FlipFunction();
 });
 
+var filter = {};
+var constfilter = window
+  .getComputedStyle(Image_Edit_Preview)
+  .getPropertyValue("filter");
+const addfilter = (filter) => {
+  var fl = 0;
+  var tmp = constfilter !== "none" ? constfilter : "";
+
+  for (var i in filter) {
+    tmp += i + "(" + filter[i] + ") ";
+    fl = 1;
+  }
+  console.log(tmp);
+
+  currentImg.style.filter = tmp;
+  if (!fl) {
+    currentImg.style.filter = "";
+  }
+};
+
 AdjustIcon.addEventListener("click", function () {
   for (var i = 0; i < avail_submenu.length; i++) {
     avail_submenu[i](0);
@@ -442,26 +455,12 @@ AdjustIcon.addEventListener("click", function () {
   rangeBullet = AdjustDiv.querySelector("#rs-bullet");
 
   //apply filter function
-  var filter = {};
   var cachedFilter = {};
-  var constfilter =  window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter')
+  constfilter = window
+    .getComputedStyle(Image_Edit_Preview)
+    .getPropertyValue("filter");
   console.log(constfilter);
-  
-  const addfilter = (filter) => {
-    var fl = 0;
-    var tmp = constfilter != 'none' ? constfilter : "";
 
-    for (var i in filter) {
-      tmp += i + "(" + filter[i] + ") ";
-      fl = 1;
-    }
-    console.log(tmp);
-    
-    currentImg.style.filter = tmp;
-    if (!fl) {
-      currentImg.style.filter = "";
-    }
-  };
   slider.addEventListener("input", function () {
     setBackgroundSize(slider);
     var bulletPosition = (slider.value - slider.min) * 2.4;
@@ -517,10 +516,11 @@ AdjustIcon.addEventListener("click", function () {
     const currentSlider = sliderControl.id;
     const temp = cachedTagValues[currentSlider];
 
-    console.log(previousFilter, filter);
+    // console.log(previousFilter, filter);
 
     Undo.push(function () {
       addfilter(previousFilter);
+      filter = { ...previousFilter };
       slider.value = temp;
       setBackgroundSize(slider);
       var bulletPosition = (slider.value - slider.min) * 2.4;
@@ -536,6 +536,7 @@ AdjustIcon.addEventListener("click", function () {
     const currentFilter = { ...filter };
     Redo.push(function () {
       addfilter(currentFilter);
+      filter = { ...currentFilter };
       slider.value = temp1;
       setBackgroundSize(slider);
       var bulletPosition = (slider.value - slider.min) * 2.4;
@@ -552,7 +553,6 @@ AdjustIcon.addEventListener("click", function () {
 });
 
 var addedFilter = "Default";
-console.log(window.getComputedStyle(document.querySelector('.chrome')).getPropertyValue('filter'));
 
 FilterIcon.addEventListener("click", function () {
   for (var i = 0; i < avail_submenu.length; i++) {
@@ -560,43 +560,44 @@ FilterIcon.addEventListener("click", function () {
   }
   show_filter_submenu(1);
 
-
   let filters = document.querySelectorAll(".filter_preview");
-  let AppliedcustomFilter = window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter')
-  AppliedcustomFilter = AppliedcustomFilter !== 'none' ? AppliedcustomFilter : '';
+
   filters.forEach((el) => {
-
     el.addEventListener("click", () => {
-
-      Image_Edit_Preview.style.removeProperty('filter');
-
+      Image_Edit_Preview.style.removeProperty("filter");
       changeActiveFilter(el);
-
-      console.log(window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter'), 'in')
-
-      Image_Edit_Preview.style.filter = AppliedcustomFilter+ window.getComputedStyle(document.querySelector('.'+el.id)).getPropertyValue('filter')
-
-      console.log(window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter'), 'in')
-
+      // console.log(window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter'), 'in')
+      constfilter = window
+        .getComputedStyle(document.querySelector("." + el.id))
+        .getPropertyValue("filter");
+      addfilter(filter);
+      // console.log(window.getComputedStyle(Image_Edit_Preview).getPropertyValue('filter'), 'in')
 
       Undo = Undo.slice(0, ind);
       Redo = Redo.slice(0, ind);
 
       const tmp2 = addedFilter;
+      const curfilter = { ...filter };
       const tmp1 = el.id;
       // const cur_el = el;
 
       Undo.push(function () {
-        let tmp = window.getComputedStyle(document.querySelector('.'+tmp2)).getPropertyValue('filter');
-        tmp = tmp !== 'none' ? tmp : ''
-        Image_Edit_Preview.style.filter = AppliedcustomFilter+tmp
+        let tmp = window
+          .getComputedStyle(document.querySelector("." + tmp2))
+          .getPropertyValue("filter");
+        tmp = tmp !== "none" ? tmp : "";
+        constfilter = tmp;
+        addfilter(curfilter);
         changeActiveFilter(document.getElementById(tmp2));
       });
 
       Redo.push(function () {
-        let tmp = window.getComputedStyle(document.querySelector('.'+tmp1)).getPropertyValue('filter');
-        tmp = tmp !== 'none' ? tmp : ''
-        Image_Edit_Preview.style.filter = AppliedcustomFilter+tmp
+        let tmp = window
+          .getComputedStyle(document.querySelector("." + tmp1))
+          .getPropertyValue("filter");
+        tmp = tmp !== "none" ? tmp : "";
+        constfilter = tmp;
+        addfilter(curfilter);
         changeActiveFilter(document.getElementById(tmp1));
       });
 

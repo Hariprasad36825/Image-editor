@@ -121,11 +121,11 @@ body {
 }
 
 .rs-range::-webkit-slider-runnable-track {
-  height: 3px;
+  height: 5px;
   background: linear-gradient(to right, #b0c5fd, #1753fa), #d7d7d7;
   background-size: var(--background-size, 0%) 100%;
   background-repeat: no-repeat;
-  border-radius: 5px;
+  border-radius: 15px;
 }
 
 .rs-range::-webkit-slider-thumb {
@@ -146,7 +146,7 @@ body {
 
 .rs-range::-moz-range-track {
   background-color: #d7d7d7;
-  border-radius: 5px;
+  border-radius: 15px;
 }
 
 .rs-range::-moz-range-thumb {
@@ -387,11 +387,13 @@ body {
 
 .filter_preview {
   margin-top: 0.5em;
+  margin-left: 1px;
+  margin-right: 1px;
 }
 
 .filter_preview .Image_Edit_Preview {
   height: 60px;
-  width: 50px;
+  width: 60px;
   border: 1px solid var(--activeBg);
   border-radius: 10px;
 }
